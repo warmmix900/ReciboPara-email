@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>REQUISIÇÃO - CSI</title>
+<style>
+:root{
+    --gap: 12px;
+    --label-w: 160px;
+    --max-input-w: 420px;
+    --min-input-w: 100px;
+    --font-family: Arial, sans-serif;
+    --form-max-w: 900px;
+}
+
+body{
+    font-family: var(--font-family);
+    margin: 16px;
+    color: #222;
+}
+
+h1{
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.info {
+    font-size: 14px;
+    line-height: 1.2;
+    text-align: left;            /* texto alinhado à esquerda */
+    margin-bottom: 16px;
+    max-width: 900px;            /* mesma largura do form */
+    margin-left: auto;           /* centraliza o bloco */
+    margin-right: auto;          /* centraliza o bloco */
+}
+
+form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--gap);
+    max-width: var(--form-max-w);
+    margin: 0 auto;
+    padding: 12px;
+    border-radius: 6px;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: var(--label-w) 1fr;
+    gap: 8px;
+    align-items: center;
+}
+
+label {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+input[type="text"],
+input[type="number"],
+textarea {
+    font-family: var(--font-family);
+    font-size: 14px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    min-width: var(--min-input-w);
+    max-width: var(--max-input-w);
+    background: #fff;
+}
+
+.autosize {
+    width: auto;
+    display: inline-block;
+    min-width: var(--min-input-w);
+    max-width: var(--max-input-w);
+    box-sizing: content-box;
+}
+
+textarea {
+    width: 100%;
+    min-height: 64px;
+    resize: vertical;
+}
+
+.campo-quantidade {
+    width: 60px;
+    text-align: center;
+}
+
+.grid-2cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap);
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid #000;
+    margin: 6px 0;
+}
+
+.signatures-horizontal div {
+    display: inline-block;
+    margin-right: 40px;
+    line-height: 2;
+    vertical-align: top;
+}
+
+.send-note {
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+.actions {
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+    margin-top: 12px;
+}
+
+button {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+    background: white;
+    cursor: pointer;
+}
+
+button:hover { background:#efefef; }
+
+@media print {
+    button, .actions { display:none !important; }
+    body { margin: 0; }
+    form { box-shadow: none; border: none; padding: 0; }
+}
+
+@media (max-width:720px){
+    .row { grid-template-columns: 1fr; }
+    .grid-2cols { grid-template-columns: 1fr; }
+    .signatures-horizontal { display:block; }
+    .info { padding-left: 12px; }
+}
+</style>
+</head>
+<body>
+<h1>REQUISIÇÃO CSI <span id="titulo-dinamico"></span></h1>
+
+<div class="info">
+    Defensoria Pública do Estado.<br>
+    Unidade de Material e Almoxarifado - CDL.<br>
+    Ramais: 8392, 8396, 8400.<br>
+    E-mail: material@defensoria.rs.def.br
+</div>
+
+<form id="formulario" onsubmit="handleSubmit(event)">
+    <div class="row">
+        <label for="csi">CSI:</label>
+        <input id="csi" name="csi" class="autosize" type="text" oninput="updateTitulo(); autosizeInput(this)">
+    </div>
+
+    <div class="row">
+        <label for="destino">Destino:</label>
+        <input id="destino" name="destino" class="autosize" type="text" oninput="updateTitulo(); autosizeInput(this)" required>
+    </div>
+
+    <div class="row">
+        <label for="cliente">Cliente:</label>
+        <input id="cliente" name="cliente" type="text" required>
+    </div>
+
+    <hr>
+
+    <div class="grid-2cols">
+        <div>
+            <label for="local">Material:</label>
+            <textarea id="local" name="local"></textarea>
+        </div>
+        <div style="display:flex; flex-direction:column;">
+            <label for="solicitacao">Quantidade:</label>
+            <input id="solicitacao" name="solicitacao" type="number" min="0" max="99999" class="campo-quantidade">
+        </div>
+    </div>
+
+    <div class="send-note">
+        Enviar uma cópia dessa requisição assinada e digitalizada para: <strong>material@defensoria.rs.def.br</strong>
+    </div>
+
+    <div class="signatures-horizontal">
+        <div>
+            Recebido por:<br>
+            Matrícula: ___________________________<br>
+            Data: ____ / ____ / ______
+        </div>
+
+        <div>
+            Enviado por:<br>
+            Matrícula: ___________________________<br>
+            Data: ____ / ____ / ______
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="actions">
+        <button type="button" onclick="window.print()">Imprimir</button>
+        <button type="submit">Salvar / PDF</button>
+    </div>
+</form>
+
+<!-- jsPDF e html2canvas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+function updateTitulo() {
+    const csi = document.getElementById('csi').value.trim();
+    const destino = document.getElementById('destino').value.trim();
+    const titulo = csi + (csi && destino ? ' - ' : '') + destino;
+    document.getElementById('titulo-dinamico').textContent = titulo;
+}
+
+const textMeasureCanvas = document.createElement('canvas');
+const textCtx = textMeasureCanvas.getContext('2d');
+
+function autosizeInput(inputEl) {
+    const style = window.getComputedStyle(inputEl);
+    const font = style.font || `${style.fontSize} ${style.fontFamily}`;
+    textCtx.font = font;
+
+    const value = inputEl.value || '';
+    const metrics = textCtx.measureText(value);
+    const padding = 28;
+    const w = Math.min(Math.max(metrics.width + padding, 100), 420);
+    inputEl.style.width = w + 'px';
+}
+
+document.querySelectorAll('.autosize').forEach(el => {
+    autosizeInput(el);
+    el.addEventListener('input', () => autosizeInput(el));
+});
+
+// Gera PDF usando html2canvas + jsPDF
+async function handleSubmit(e) {
+    e.preventDefault();
+    const { jsPDF } = window.jspdf;
+    const formEl = document.getElementById('formulario');
+
+    const canvas = await html2canvas(formEl, { scale: 2 });
+    const imgData = canvas.toDataURL('image/png');
+
+    const pdf = new jsPDF({ unit: 'pt', format: 'a4' });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const imgWidth = pageWidth - 40; // margem 20px
+    const imgHeight = canvas.height * (imgWidth / canvas.width);
+
+    pdf.addImage(imgData, 'PNG', 20, 20, imgWidth, imgHeight);
+
+    const csi = (document.getElementById('csi').value || 'sem-csi').trim().replace(/\s+/g,'-');
+    const destino = (document.getElementById('destino').value || 'sem-destino').trim().replace(/\s+/g,'-');
+
+    pdf.save(`ReciboCSI-${csi}-${destino}.pdf`);
+}
+
+updateTitulo();
+</script>
+</body>
+</html>
